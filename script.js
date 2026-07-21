@@ -78,7 +78,9 @@ function logout() {
 const menuOsteria = {
     'Drink': [
         "Formula Aperitivo", 
-        "Spritz (Aperol / Campari / Select)",
+      "Spritz Aperol",     
+        "Spritz Campari",    
+        "Spritz Select",     
         "Hugo",
         "Afragòla",
         "Passoa Aperol",
