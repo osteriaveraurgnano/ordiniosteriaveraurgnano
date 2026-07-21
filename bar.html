@@ -316,5 +316,14 @@
             });
         }
     </script>
+    <script>
+    // Questo gestisce il login persistente per il bar
+    window.addEventListener('load', () => {
+        if (localStorage.getItem("dispositivoAutorizzato") === "si") {
+            document.getElementById('login-screen').style.display = "none";
+            document.getElementById('app-screen').style.display = "block";
+        }
+    });
+</script>
 </body>
 </html>
