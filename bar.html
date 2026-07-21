@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitor Bar / Cassa - Osteria Vera</title>
+    <!-- Script EmailJS[cite: 1] -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        body { font-family: sans-serif; background-color: #1a2b3c; color: #fff; margin: 0; padding: 20px; transition: 0.3s; }
+        h1 { text-align: center; font-family: 'Georgia', serif; }
+        .controlli { text-align: center; margin-bottom: 20px; }
+        .btn-vista { padding: 10px 20px; font-weight: bold; border: none; cursor: pointer; border-radius: 4px; margin: 0 5px; font-size: 16px; }
+        
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; height: 80vh; }
+        .colonna-sala { background-color: rgba(0,0,0,0.3); border-radius: 8px; padding: 15px; overflow-y: auto; border-top: 5px solid; }
+        #col-panca { border-color: #5cb85c; } #col-quadri { border-color: #5bc0de; } #col-forno { border-color: #d9534f; }
+        .titolo-sala { text-align: center; margin-top: 0; letter-spacing: 2px; font-size: 18px;}
+        
+        .ticket { background: #e0f7fa; color: #000; border-radius: 4px; padding: 15px; margin-bottom: 15px; }
+        .ticket-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; border-bottom: 2px dashed #ccc; padding-bottom: 10px; margin-bottom: 10px; }
+        .ticket-piatti { font-size: 18px; line-height: 1.6; }
+        .btn-azione { color: white; border: none; padding: 10px; width: 100%; margin-top: 15px; font-weight: bold; cursor: pointer; border-radius: 4px;}
+
+        /* --- STILI PER LOGIN SCREEN ---[cite: 2] */
+        #login-screen, #otp-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90vh; text-align: center; }
+        .login-input { width: 80%; max-width: 300px; padding: 15px; border: none; border-radius: 4px; font-size: 16px; margin-bottom: 20px; text-align: center; }
+        .action-btn { background-color: #5cb85c; color: white; border: none; padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 80%; max-width: 330px; text-transform: uppercase; margin-bottom: 10px; }
+        .error-msg { color: #d9534f; margin-top: 20px; font-size: 16px; font-weight: bold; display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- SCHERMATA DI LOGIN[cite: 1] -->
+    <div id="login-screen">
+        <h2 style="color: #5bc0de;">Accesso Reparto Bar/Cassa</h2>
+        <input type="email" id="email-input" class="login-input" placeholder="Inserisci la tua email">
+        <button class="action-btn" onclick="tentaLogin()">Accedi</button>
+        <div id="login-error" class="error-msg">Email non autorizzata!</div>
+    </div>
+
+    <!-- SCHERMATA OTP[cite: 1] -->
+    <div id="otp-screen" style="display: none;">
+        <h2 style="color: #5bc0de;">Verifica Sicurezza</h2>
+        <p>Codice inviato all'email dell'osteria.</p>
+        <input type="text" id="otp-input" class="login-input" placeholder="Codice OTP a 6 cifre">
+        <button class="action-btn" onclick="verificaOTP()">Verifica Codice</button>
+        <button class="action-btn" style="background-color: #ccc; color: black;" onclick="tornaAlLogin()">Annulla</button>
+        <div id="otp-error" class="error-msg">Codice errato! Riprova.</div>
+    </div>
+
+    <!-- CONTENUTO DELL'APP (Nascosto di default)[cite: 3] -->
+    <div id="app-screen" style="display: none;">
+        <div class="controlli">
+            <button class="btn-vista" id="btn-bar" style="background: #5bc0de; color: white;" onclick="cambiaVista('bar')">🧊 VISTA BAR</button>
+            <button class="btn-vista" id="btn-cassa" style="background: #ccc; color: black;" onclick="cambiaVista('cassa')">💰 VISTA CASSA</button>
+        </div>
+
+        <h1 id="titolo-pagina" style="color: #5bc0de;">REPARTO BAR</h1>
+
+        <div class="dashboard">
+            <div class="colonna-sala" id="col-panca"><h2 class="titolo-sala">Sala Panca</h2><div id="ordini-panca"></div></div>
+            <div class="colonna-sala" id="col-quadri"><h2 class="titolo-sala">Sala Quadri</h2><div id="ordini-quadri"></div></div>
+            <div class="colonna-sala" id="col-forno"><h2 class="titolo-sala">Sala Forno</h2><div id="ordini-forno"></div></div>
+        </div>
+    </div>
+
+    <!-- LOGICA DI LOGIN[cite: 1] -->
+    <script type="text/javascript">
+        // emailjs.init("LA_TUA_PUBLIC_KEY"); // SCOMMENTA E INSERISCI LA TUA CHIAVE
+
+        const emailAutorizzate = [
+            "matteopalmie06@gmail.com",
+            "moni.palmi22@gmail.com"
+        ];
+        let otpAttuale = "";
+        let utenteInAttesa = "";
+
+        async function tentaLogin() {
+            const inputEmail = document.getElementById('email-input').value.toLowerCase().trim();
+            const errorMsg = document.getElementById('login-error');
+
+            if (emailAutorizzate.includes(inputEmail)) {
+                errorMsg.style.display = "none";
+                utenteInAttesa = inputEmail.split('@')[0]; 
+                otpAttuale = Math.floor(100000 + Math.random() * 900000).toString();
+                
+                try {
+                    await emailjs.send("service_f1fl51h", "template_tnfs2ga", {
+                        otp_code: otpAttuale,
+                        to_email: "osteriaveraurgnano@gmail.com"
+                    });
+                    alert("Codice inviato all'email dell'osteria!");
+                } catch (error) {
+                    console.error("Errore invio email:", error);
+                    alert("Errore invio email. Codice di emergenza: " + otpAttuale);
+                }
+                
+                document.getElementById('login-screen').style.display = "none";
+                document.getElementById('otp-screen').style.display = "flex";
+                document.getElementById('otp-input').value = "";
+            } else {
+                errorMsg.style.display = "block";
+            }
+        }
+
+        function verificaOTP() {
+            const inputOtp = document.getElementById('otp-input').value.trim();
+            const errorOtp = document.getElementById('otp-error');
+
+            if (inputOtp === otpAttuale) {
+                errorOtp.style.display = "none";
+                document.getElementById('otp-screen').style.display = "none";
+                document.getElementById('app-screen').style.display = "block"; 
+            } else {
+                errorOtp.style.display = "block";
+            }
+        }
+
+        function tornaAlLogin() {
+            document.getElementById('otp-screen').style.display = "none";
+            document.getElementById('login-screen').style.display = "flex";
+            otpAttuale = "";
+            utenteInAttesa = "";
+        }
+    </script>
+
+    <!-- LOGICA FIREBASE ORIGINALE[cite: 3] -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+        import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+        import { firebaseConfig } from "./config.js";
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const q = query(collection(db, "comande"), where("pagato", "==", false));
+
+        window.listinoPrezzi = {
+            "Formula Aperitivo": 4.00,
+            "Spritz (Aperol / Campari / Select)": 6.00,
+            "Hugo": 7.00,
+            "Afragòla": 8.00,
+            "Passoa Aperol": 8.00,
+            "Enzoni": 7.00,
+            "Negroni": 6.00,
+            "Negroni Sbagliato": 6.00,
+            "Limoncello Tonic": 7.00,
+            "Mirto Tonic": 7.00,
+            "Basilicolo": 7.00,
+            "Gin Tonic": 7.00,
+            "Turista - Alcool free": 7.00,
+            "Whitley Neill Violet": 10.00,
+            "Malfy Gin Collection": 11.00,
+            "Roku Gin": 12.00,
+            "Nordés Gin": 12.00,
+            "Gin Mare": 13.00,
+            "Antipasto della casa": 5.00,
+            "Provola in Purgatorio": 8.00,
+            "Tagliere di Formaggi": 15.00,
+            "Tagliere di Salumi": 14.00,
+            "Frittelle": 4.50,
+            "Patatine Fritte": 4.50,
+            "Vico": 9.00,
+            "Arola": 9.00,
+            "Fornacelle": 9.00,
+            "Moiano": 10.00,
+            "Montechiaro": 11.00,
+            "Seiano": 12.00,
+            "Ticciano": 10.00,
+            "Massaquano": 10.00,
+            "Gnocchi alla Sorrentina": 11.00,
+            "fusilli alla Genovese": 14.00,
+            "Trofie tricolore": 13.00,
+            "Polpette al Sugo": 12.00,
+            "Parmigiana di Melanzane": 10.00,
+            "Caprese": 12.00,
+            "Pastiera": 6.00,
+            "Cremoso alla nocciola": 6.00,
+            "sorbetto al limone": 4.00,
+            "Sauvignon Collio DOC - Villa Folini (Calice)": 6.00,
+            "Sauvignon Collio DOC - Villa Folini (Bottiglia)": 26.00,
+            "Garda Classico Chiaretto - Cà Maiol (Calice)": 7.50,
+            "Garda Classico Chiaretto - Cà Maiol (Bottiglia)": 33.00,
+            "Chianti Superiore DOCG - Banfi (Calice)": 6.00,
+            "Chianti Superiore DOCG - Banfi (Bottiglia)": 27.00,
+            "Lugana DOC - BERTANI": 38.00,
+            "Ribolla Gialla COF DOC - Sirch": 31.00,
+            "Fiano di Avellino - Mastroberardino": 34.00,
+            "Montepulciano d'Abruzzo Riserva DOC - Terre degli Eremi": 25.00,
+            "Primitivo di Manduria DOC - Soloperto": 31.00,
+            "Barolo DOCG - Il Pozzo": 46.00,
+            "Prosecco Valdobbiadene Superiore - Val D'Oca": 33.00,
+            "Ama Pils (Piccola)": 3.50,
+            "Ama Pils (Media)": 6.50,
+            "Diabolici Red (Piccola)": 3.50,
+            "Diabolici Red (Media)": 6.50,
+            "Adnams Innovation (Piccola)": 4.00,
+            "Adnams Innovation (Media)": 7.50,
+            "Lupulus Blonde (33cl)": 7.00,
+            "Rochefort 8º (33cl)": 8.50,
+            "William's Joker I.P.A (50cl)": 7.50,
+            "William's Joker I.P.A Alcol Free (44cl)": 8.00,
+            "William's Talking Head A.P.ALE (50cl)": 7.00,
+            "Acqua Naturale / Frizzante (0,5L)": 2.00,
+            "Coca Cola / Coca Cola Zero": 3.50,
+            "Sprite": 3.50,
+            "Estathé (Limone / Pesca)": 3.50,
+            "crodino": 3.00,
+            "campari soda": 3.50,
+            "Caffè Espresso": 1.50,
+            "Caffè Macchiato": 1.50,
+            "Caffè Corretto": 2.00,
+            "Caffè Decaffeinato": 1.50,
+            "Caffè al Ginseng": 2.00,
+            "Limoncello": 4.00,
+            "Mirto": 4.00,
+            "Meloncello": 4.00,
+            "Amari": 4.00,
+            "Acquavite Nardini Bianca": 4.00,
+            "Grappa Sibona Moscato": 5.00,
+            "Grappa Diciotto Lune": 6.00,
+            "Grappa Monpra": 6.50
+        };
+        
+        window.vistaAttuale = "bar"; 
+        let datiComande = []; 
+
+        window.segnaFattoBar = async function(id) { await updateDoc(doc(db, "comande", id), { da_fare_bar: {} }); }
+        window.segnaPagato = async function(id) { await updateDoc(doc(db, "comande", id), { pagato: true }); }
+
+        window.cambiaVista = function(nuovaVista) {
+            window.vistaAttuale = nuovaVista;
+            
+            if(nuovaVista === 'bar') {
+                document.body.style.backgroundColor = "#1a2b3c";
+                document.getElementById('titolo-pagina').innerText = "REPARTO BAR";
+                document.getElementById('titolo-pagina').style.color = "#5bc0de";
+                document.getElementById('btn-bar').style.background = "#5bc0de";
+                document.getElementById('btn-bar').style.color = "white";
+                document.getElementById('btn-cassa').style.background = "#ccc";
+                document.getElementById('btn-cassa').style.color = "black";
+            } else {
+                document.body.style.backgroundColor = "#2d2d2d";
+                document.getElementById('titolo-pagina').innerText = "CASSA PRINCIPALE";
+                document.getElementById('titolo-pagina').style.color = "#f0ad4e";
+                document.getElementById('btn-cassa').style.background = "#f0ad4e";
+                document.getElementById('btn-cassa').style.color = "white";
+                document.getElementById('btn-bar').style.background = "#ccc";
+                document.getElementById('btn-bar').style.color = "black";
+            }
+            disegnaSchermo(); 
+        }
+
+        onSnapshot(q, (snapshot) => {
+            datiComande = [];
+            snapshot.forEach((docSnap) => {
+                datiComande.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            disegnaSchermo();
+        });
+
+       function disegnaSchermo() {
+            document.getElementById('ordini-panca').innerHTML = "";
+            document.getElementById('ordini-quadri').innerHTML = "";
+            document.getElementById('ordini-forno').innerHTML = "";
+
+            datiComande.forEach((ordine) => {
+                let piattiHtml = "";
+                let daMostrare = false;
+                let tastoHtml = "";
+                let totaleScontrino = 0; 
+
+                if (window.vistaAttuale === "bar") {
+                    if (!ordine.da_fare_bar || Object.keys(ordine.da_fare_bar).length === 0) return;
+                    for (let [piatto, quantita] of Object.entries(ordine.da_fare_bar)) {
+                        piattiHtml += `<div><b>${quantita}x</b> ${piatto}</div>`;
+                    }
+                    daMostrare = true;
+                    tastoHtml = `<button class="btn-azione" style="background: #5bc0de;" onclick="segnaFattoBar('${ordine.id}')">FATTO</button>`;
+                } 
+                else {
+                    for (let [piatto, quantita] of Object.entries(ordine.piatti)) {
+                        let prezzoUnitario = window.listinoPrezzi[piatto] || 0; 
+                        let costoRiga = prezzoUnitario * quantita;
+                        totaleScontrino += costoRiga;
+                        
+                        piattiHtml += `
+                            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #ccc; margin-bottom: 5px;">
+                                <span><b>${quantita}x</b> ${piatto}</span>
+                                <span>${costoRiga.toFixed(2)} €</span>
+                            </div>`;
+                    }
+                    daMostrare = true;
+                    
+                    tastoHtml = `
+                        <div style="font-size: 20px; font-weight: bold; text-align: right; color: #d9534f; padding-top: 10px; padding-bottom: 10px;">
+                            TOTALE: ${totaleScontrino.toFixed(2)} €
+                        </div>
+                        <button class="btn-azione" style="background: #5cb85c;" onclick="segnaPagato('${ordine.id}')">PAGATO</button>
+                    `;
+                }
+
+                if (daMostrare) {
+                    const ticket = `
+                        <div class="ticket">
+                            <div class="ticket-header">
+                                <span>Tavolo ${ordine.tavolo}</span>
+                                <span style="font-size:12px;">Da: ${ordine.cameriere}</span>
+                            </div>
+                            <div class="ticket-piatti">${piattiHtml}</div>
+                            ${tastoHtml}
+                        </div>
+                    `;
+                    if (ordine.sala === "Panca") document.getElementById('ordini-panca').innerHTML += ticket;
+                    if (ordine.sala === "Quadri") document.getElementById('ordini-quadri').innerHTML += ticket;
+                    if (ordine.sala === "Forno") document.getElementById('ordini-forno').innerHTML += ticket;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

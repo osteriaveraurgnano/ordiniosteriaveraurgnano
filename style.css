@@ -1,0 +1,269 @@
+/* style.css */
+
+:root {
+    --panna: #FFFFF0;
+    --blu-elegante: #173F5F;
+    --blu-dark: #0f2c44;
+    --alert: #d9534f;
+    --success: #5cb85c;
+    --border-color: #dcd7ce;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--panna);
+    color: var(--blu-elegante);
+    margin: 0; 
+    padding: 0;
+    user-select: none; /* Previene la selezione involontaria del testo premendo velocemente */
+}
+
+/* --- LOGIN SCREEN --- */
+#login-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: var(--blu-elegante);
+    color: var(--panna);
+    padding: 20px;
+    text-align: center;
+}
+
+#email-input {
+    width: 80%;
+    max-width: 300px;
+    padding: 15px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.action-btn {
+    background-color: var(--success);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 80%;
+    max-width: 300px;
+    text-transform: uppercase;
+}
+
+.error-msg {
+    color: #ff6b6b;
+    margin-top: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    display: none;
+}
+
+/* --- APP SCREEN MAIN --- */
+#app-screen { 
+    display: none; 
+    height: 100vh; 
+    flex-direction: column; 
+}
+
+header {
+    background-color: var(--blu-elegante); 
+    color: var(--panna);
+    padding: 15px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+}
+
+.user-info { font-size: 12px; font-weight: bold; }
+
+select#table-select {
+    font-size: 16px; 
+    padding: 8px; 
+    background: var(--panna); 
+    color: var(--blu-elegante);
+    border: none;
+    border-radius: 4px; 
+    font-weight: bold;
+}
+
+.logout-btn {
+    background: transparent; 
+    border: 1px solid var(--panna); 
+    color: var(--panna); 
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.main-content { 
+    display: flex; 
+    flex: 1; 
+    overflow: hidden; 
+}
+
+/* --- SIDEBAR CATEGORIE --- */
+.categories { 
+    width: 30%; 
+    background: #e5dfd3; 
+    overflow-y: auto; 
+    border-right: 1px solid var(--border-color);
+}
+
+.category-btn {
+    width: 100%;            /* Occupa tutta la larghezza della colonna */
+    padding: 15px 10px;     /* Più alti e comodi da premere */
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;     /* Spazio tra un bottone e l'altro */
+    border: none;
+    border-radius: 8px;
+    background-color: var(--panna);
+    color: var(--blu-elegante);
+    cursor: pointer;
+    text-align: left;       /* Testo allineato a sinistra come un menù vero */
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+.category-btn .active { 
+    background: var(--panna); 
+    border-left: 5px solid var(--blu-elegante); 
+}
+
+/* --- GRIGLIA PIATTI --- */
+.items-grid { 
+    flex: 1; 
+    padding: 10px; 
+    overflow-y: auto; 
+    display: grid; 
+    grid-template-columns: 1fr;
+    gap: 10px; 
+    align-content: start; 
+}
+
+.item-card {
+    background: #fff; 
+    border: 1px solid var(--border-color); 
+    border-radius: 6px;
+    padding: 15px; 
+    font-size: 15px; 
+    font-weight: bold; 
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+    cursor: pointer;
+    color: var(--blu-elegante);
+    transition: transform 0.1s, background-color 0.1s;
+}
+
+.item-card:active { 
+    background: #f0f0f0; 
+    transform: scale(0.97); 
+}
+
+/* --- BARRA CARRELLO INFERIORE --- */
+.cart-bar {
+    background: #fff; 
+    border-top: 2px solid var(--blu-elegante);
+    padding: 10px 15px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+}
+
+.cart-summary { 
+    font-size: 16px; 
+    font-weight: bold; 
+    cursor: pointer;
+}
+
+.send-btn {
+    background: var(--success); 
+    color: white; 
+    border: none;
+    padding: 15px 20px; 
+    font-size: 16px; 
+    font-weight: bold; 
+    border-radius: 6px; 
+    cursor: pointer;
+}
+
+/* --- MODALE CARRELLO --- */
+.modal-overlay {
+    display: none; 
+    position: fixed; 
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(23, 63, 95, 0.8); 
+    flex-direction: column; 
+    justify-content: flex-end;
+    z-index: 1000;
+}
+
+.cart-content {
+    background: var(--panna); 
+    height: 75%; 
+    border-radius: 20px 20px 0 0;
+    padding: 20px; 
+    display: flex; 
+    flex-direction: column;
+}
+
+.cart-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    border-bottom: 2px solid var(--blu-elegante);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.cart-header h2 { margin: 0; font-family: 'Georgia', serif; font-size: 22px; }
+
+.close-btn {
+    font-size: 24px; 
+    border: none; 
+    background: none;
+    color: var(--blu-elegante);
+    cursor: pointer;
+}
+
+.cart-list { 
+    flex: 1; 
+    overflow-y: auto; 
+}
+
+.cart-item { 
+    display: flex; 
+    justify-content: space-between; 
+    padding: 15px 0; 
+    border-bottom: 1px dashed var(--border-color); 
+    font-size: 16px;
+}
+.item-row-cameriere {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 12px;
+    margin-bottom: 5px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.piatto-main { flex: 1; font-weight: bold; }
+
+.btn-aperitivo {
+    background: #f0ad4e;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-left: 10px;
+    cursor: pointer;
+}
