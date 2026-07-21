@@ -342,7 +342,7 @@ function aggiungiAlCarrello(piatto, elementoHtml) {
             elementoHtml.style.color = testoOriginale; 
         }, 150);
     }
-}
+
 
 function aggiornaUI() {
     document.getElementById('cart-count').innerText = carrello.length;
