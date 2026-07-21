@@ -101,19 +101,21 @@
                 errorMsg.style.display = "block";
             }
         }
+function verificaOTP() {
+    const inputOtp = document.getElementById('otp-input').value.trim();
+    const errorOtp = document.getElementById('otp-error');
 
-        function verificaOTP() {
-            const inputOtp = document.getElementById('otp-input').value.trim();
-            const errorOtp = document.getElementById('otp-error');
-
-            if (inputOtp === otpAttuale) {
-                errorOtp.style.display = "none";
-                document.getElementById('otp-screen').style.display = "none";
-                document.getElementById('app-screen').style.display = "block"; 
-            } else {
-                errorOtp.style.display = "block";
-            }
-        }
+    if (inputOtp === otpAttuale) {
+        // --- QUESTA RIGA SALVA IL LOGIN PER TUTTE LE PAGINE ---
+        localStorage.setItem("dispositivoAutorizzato", "si");
+        
+        errorOtp.style.display = "none";
+        document.getElementById('otp-screen').style.display = "none";
+        document.getElementById('app-screen').style.display = "block"; 
+    } else {
+        errorOtp.style.display = "block";
+    }
+}
 
         function tornaAlLogin() {
             document.getElementById('otp-screen').style.display = "none";
