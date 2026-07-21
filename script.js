@@ -72,6 +72,7 @@ function tornaAlLogin() {
 }
 
 function logout() {
+   localStorage.removeItem("dispositivoAutorizzato");
     document.getElementById('email-input').value = "";
     document.getElementById('table-select').value = "0";
     carrello = [];
