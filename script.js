@@ -1,6 +1,7 @@
 // ==========================================
 // 1. SISTEMA DI SICUREZZA (WHITELIST + OTP)
 // ==========================================
+
 const emailAutorizzate = [
    "matteopalmie06@gmail.com",
     "moni.palmi22@gmail.com"
@@ -49,7 +50,9 @@ function verificaOTP() {
     const errorOtp = document.getElementById('otp-error');
 
     if (inputOtp === otpAttuale) {
-        // OTP Corretto! Sblocca l'app
+        // --- NUOVO: Salva il dispositivo come autorizzato ---
+        localStorage.setItem("dispositivoAutorizzato", "si");
+        
         errorOtp.style.display = "none";
         document.getElementById('otp-screen').style.display = "none";
         document.getElementById('app-screen').style.display = "flex";
@@ -57,7 +60,6 @@ function verificaOTP() {
         document.getElementById('logged-user').innerText = utenteInAttesa;
         caricaCategoria('Panuozzi');
     } else {
-        // OTP Errato
         errorOtp.style.display = "block";
     }
 }
@@ -201,6 +203,10 @@ let carrello = [];
 
 // Inizializza l'interfaccia all'avvio
 window.onload = () => {
+   if (localStorage.getItem("dispositivoAutorizzato") === "si") {
+        document.getElementById('login-screen').style.display = "none";
+        document.getElementById('app-screen').style.display = "flex";
+    }
     generaCategorieLaterali();
     caricaCategoria('Panuozzi'); // Carica subito i panuozzi di default
 };
