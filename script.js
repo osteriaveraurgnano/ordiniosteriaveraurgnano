@@ -270,11 +270,25 @@ function caricaCategoria(nomeCategoria) {
 }
 
 function aggiungiAlCarrello(piatto, elementoHtml) {
+    // --- 1. POPUP A COMPARSA PER LO SPRITZ ---
+    if (piatto === "Spritz (Aperol / Campari / Select)") {
+        let variante = prompt("Che Spritz desideri?\nScrivi: Aperol, Campari, oppure Select", "Aperol");
+        
+        // Se il cameriere preme "Annulla" sul popup, blocchiamo l'aggiunta
+        if (variante === null || variante.trim() === "") {
+            return; 
+        }
+        // Il piatto diventa ad esempio "Spritz Aperol"
+        piatto = "Spritz " + variante.trim(); 
+    }
+
     let capienzaMassima = 0;
     
     carrello.forEach(p => {
         if (p !== "Formula Aperitivo") { 
+            // Aggiunto p.startsWith("Spritz") per contare i nuovi spritz personalizzati
             if (menuOsteria['Drink'].includes(p) || 
+                p.startsWith("Spritz") || 
                 menuOsteria['ViniCalice'].includes(p) || 
                 menuOsteria['BirreSpina'].includes(p) || 
                 menuOsteria['BirreBottiglia'].includes(p)) {
