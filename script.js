@@ -2,12 +2,12 @@
 // 1. SISTEMA DI SICUREZZA (WHITELIST + OTP)
 // ==========================================
 const emailAutorizzate = [
-   "matteopalmie06@gmail.com",
+    "matteopalmie06@gmail.com",
     "moni.palmi22@gmail.com"
 ];
 
-let otpAttuale = ""; // Variabile per salvare il codice generato
-let utenteInAttesa = ""; // Salva chi sta cercando di entrare
+let otpAttuale = ""; 
+let utenteInAttesa = ""; 
 
 async function tentaLogin() {
     const inputEmail = document.getElementById('email-input').value.toLowerCase().trim();
@@ -17,19 +17,16 @@ async function tentaLogin() {
         errorMsg.style.display = "none";
         utenteInAttesa = inputEmail.split('@')[0]; 
         
-        // Genera codice OTP
         otpAttuale = Math.floor(100000 + Math.random() * 900000).toString();
         
         try {
-            // Invio email reale tramite EmailJS
             await emailjs.send("service_f1fl51h", "template_tnfs2ga", {
                 otp_code: otpAttuale,
                 to_email: "osteriaveraurgnano@gmail.com"
             });
-            
             alert("Codice inviato all'email dell'osteria!");
         } catch (error) {
-            console.error("Errore invio email (controlla la Public Key EmailJS in index.html e il Service/Template ID qui sopra):", error);
+            console.error("Errore invio email:", error);
             alert("Errore invio email. Codice di emergenza: " + otpAttuale);
         }
         
@@ -46,15 +43,12 @@ function verificaOTP() {
     const errorOtp = document.getElementById('otp-error');
 
     if (inputOtp === otpAttuale) {
-        // --- NUOVO: Salva il dispositivo come autorizzato ---
         localStorage.setItem("dispositivoAutorizzato", "si");
-        
         errorOtp.style.display = "none";
         document.getElementById('otp-screen').style.display = "none";
         document.getElementById('app-screen').style.display = "flex";
-        
         document.getElementById('logged-user').innerText = utenteInAttesa;
-        caricaCategoria('Panuozzi');
+        caricaCategoria('Drink'); 
     } else {
         errorOtp.style.display = "block";
     }
@@ -81,10 +75,9 @@ function logout() {
 // ==========================================
 // 2. DATABASE DEL MENU 
 // ==========================================
-// Il database locale dei piatti per l'app dei camerieri
 const menuOsteria = {
     'Drink': [
-        "Formula Aperitivo", // Questa aggiungerà 4€ in cassa
+        "Formula Aperitivo", 
         "Spritz (Aperol / Campari / Select)",
         "Hugo",
         "Afragòla",
@@ -194,17 +187,15 @@ const menuOsteria = {
 // ==========================================
 let carrello = [];
 
-// Inizializza l'interfaccia all'avvio
 window.onload = () => {
     if (localStorage.getItem("dispositivoAutorizzato") === "si") {
         document.getElementById('login-screen').style.display = "none";
         document.getElementById('app-screen').style.display = "flex";
     }
     generaCategorieLaterali();
-    caricaCategoria('Drink'); // Carica subito i Drink di default
+    caricaCategoria('Drink'); 
 };
 
-// Funzione 1: Costruisce SOLO i bottoni colorati a sinistra
 function generaCategorieLaterali() {
     const catContainer = document.getElementById('cat-container');
     catContainer.innerHTML = ''; 
@@ -226,7 +217,6 @@ function generaCategorieLaterali() {
         let btn = document.createElement('button');
         btn.className = 'category-btn'; 
         btn.innerText = nomiEstetici[nomeCategoria] || nomeCategoria; 
-        
         btn.onclick = () => caricaCategoria(nomeCategoria);
         catContainer.appendChild(btn);
     }
@@ -249,7 +239,6 @@ function caricaCategoria(nomeCategoria) {
         itemRow.style.borderRadius = "8px";
         itemRow.style.border = "1px solid #ddd";
 
-        // Nome del piatto che clicchi
         let nomePiatto = document.createElement('div');
         nomePiatto.innerText = piatto;
         nomePiatto.style.fontWeight = "bold";
@@ -258,7 +247,6 @@ function caricaCategoria(nomeCategoria) {
         
         itemRow.appendChild(nomePiatto);
 
-        // Bottone Aperitivo (solo se è una bevanda)
         if (['Drink', 'ViniCalice', 'ViniBottiglia', 'BirreSpina', 'BirreBottiglia'].includes(nomeCategoria)) {
             let chk = document.createElement('button');
             chk.innerText = "+4€";
@@ -282,40 +270,35 @@ function caricaCategoria(nomeCategoria) {
 }
 
 function aggiungiAlCarrello(piatto, elementoHtml) {
-    // 1. Calcoliamo la capacità massima di aperitivi attuale
     let capienzaMassima = 0;
     
-    // Contiamo le bevande nel carrello (ESCLUDENDO la Formula Aperitivo)
     carrello.forEach(p => {
-        if (p !== "Formula Aperitivo") { // <-- IL TRUCCO È QUI!
+        if (p !== "Formula Aperitivo") { 
             if (menuOsteria['Drink'].includes(p) || 
                 menuOsteria['ViniCalice'].includes(p) || 
                 menuOsteria['BirreSpina'].includes(p) || 
                 menuOsteria['BirreBottiglia'].includes(p)) {
-                capienzaMassima += 1; // 1 drink = 1 aperitivo
+                capienzaMassima += 1; 
             } 
             else if (menuOsteria['ViniBottiglia'].includes(p)) {
-                capienzaMassima += 6; // 1 bottiglia = 6 aperitivi
+                capienzaMassima += 6; 
             }
         }
     });
 
-    // 2. Controllo stringente per la Formula Aperitivo
     if (piatto === "Formula Aperitivo") {
         let conteggioAperitiviPresenti = carrello.filter(p => p === "Formula Aperitivo").length;
 
         if (conteggioAperitiviPresenti >= capienzaMassima) {
             alert("⚠️ Capacità raggiunta: aggiungi una bottiglia o un altro drink per altre formule aperitivo!");
-            return; // Blocca l'aggiunta se non c'è capienza
+            return; 
         }
     }
 
-    // 3. Se il controllo passa, procedi con l'aggiunta
     carrello.push(piatto);
     aggiornaUI();
     
-    // Feedback visivo
-    if (elementoHtml) { // Controlliamo che l'elemento esista
+    if (elementoHtml) { 
         let coloreOriginale = elementoHtml.style.backgroundColor;
         let testoOriginale = elementoHtml.style.color;
         elementoHtml.style.backgroundColor = "var(--success)";
@@ -326,23 +309,6 @@ function aggiungiAlCarrello(piatto, elementoHtml) {
         }, 150);
     }
 }
-
-    // 3. Se il controllo passa, procedi con l'aggiunta
-    carrello.push(piatto);
-    aggiornaUI();
-    
-    // Feedback visivo
-    if (elementoHtml) { // Controlliamo che l'elemento esista
-        let coloreOriginale = elementoHtml.style.backgroundColor;
-        let testoOriginale = elementoHtml.style.color;
-        elementoHtml.style.backgroundColor = "var(--success)";
-        elementoHtml.style.color = "white";
-        setTimeout(() => { 
-            elementoHtml.style.backgroundColor = coloreOriginale; 
-            elementoHtml.style.color = testoOriginale; 
-        }, 150);
-    }
-
 
 function aggiornaUI() {
     document.getElementById('cart-count').innerText = carrello.length;
@@ -376,11 +342,10 @@ async function inviaOrdine() {
     if(carrello.length === 0) return alert("Comanda vuota.");
 
     try {
-        let conteggiNuovi = {}; // Totale per lo scontrino in cassa
-        let nuoviCucina = {};   // Coda per il monitor cucina
-        let nuoviBar = {};      // Coda per il monitor bar
+        let conteggiNuovi = {}; 
+        let nuoviCucina = {};   
+        let nuoviBar = {};      
 
-        // SMISTAMENTO INTELLIGENTE
         carrello.forEach(piatto => {
             conteggiNuovi[piatto] = (conteggiNuovi[piatto] || 0) + 1;
             
@@ -388,11 +353,9 @@ async function inviaOrdine() {
             let vaAlBar = false;
 
             if (piatto === "Formula Aperitivo") {
-                // Eccezione: L'aperitivo (il cibo) va solo in cucina
                 vaInCucina = true; 
             } 
             else if (menuOsteria['Dolci'].includes(piatto)) {
-                // I dolci stampano il ticket su entrambi i monitor
                 vaInCucina = true;
                 vaAlBar = true; 
             } 
@@ -401,20 +364,16 @@ async function inviaOrdine() {
                 menuOsteria['Panuozzi'].includes(piatto) ||
                 menuOsteria['Cucina'].includes(piatto)
             ) {
-                // Il cibo classico va solo in cucina
                 vaInCucina = true; 
             } 
             else {
-                // Tutto il resto del menu (Vini, Birre, Drink, Caffetteria) va al bar
                 vaAlBar = true; 
             }
 
-            // Aggiungiamo i piatti nelle rispettive liste in base a dove devono andare
             if (vaInCucina) nuoviCucina[piatto] = (nuoviCucina[piatto] || 0) + 1;
             if (vaAlBar) nuoviBar[piatto] = (nuoviBar[piatto] || 0) + 1;
         });
 
-        // 1. Cerca se esiste un ordine non pagato per questa Sala e questo Tavolo
         const q = window.query(
             window.collezione(window.dbOsteria, "comande"),
             window.where("sala", "==", sala),
@@ -424,7 +383,6 @@ async function inviaOrdine() {
         const querySnapshot = await window.ottieniDocumenti(q);
 
         if (!querySnapshot.empty) {
-            // ORDINE TROVATO: Aggreghiamo i nuovi piatti a quelli vecchi
             const docEsistente = querySnapshot.docs[0];
             const dati = docEsistente.data();
             
@@ -432,11 +390,9 @@ async function inviaOrdine() {
             let cucinaAggiornata = dati.da_fare_cucina || {};
             let barAggiornato = dati.da_fare_bar || {};
 
-            // Aggiorniamo il totale scontrino per la Cassa
             for (let [piatto, qty] of Object.entries(conteggiNuovi)) {
                 piattiAggiornati[piatto] = (piattiAggiornati[piatto] || 0) + qty; 
             }
-            // Aggiorniamo i monitor aggiungendo solo i piatti corretti
             for (let [piatto, qty] of Object.entries(nuoviCucina)) {
                 cucinaAggiornata[piatto] = (cucinaAggiornata[piatto] || 0) + qty;
             }
@@ -451,7 +407,6 @@ async function inviaOrdine() {
             });
             alert("🔄 Aggiunta al Tavolo " + tavolo + " inviata ai monitor!");
         } else {
-            // NESSUN ORDINE: Ne creiamo uno nuovo, con le tre liste già smistate
             await window.aggiungiDocumento(window.collezione(window.dbOsteria, "comande"), {
                 sala: sala,
                 tavolo: parseInt(tavolo),
@@ -465,7 +420,6 @@ async function inviaOrdine() {
             alert("✅ Nuovo ordine: Tavolo " + tavolo);
         }
         
-        // Reset interfaccia
         carrello = []; aggiornaUI(); chiudiCarrello();
         document.getElementById('table-select').value = "0";
 
