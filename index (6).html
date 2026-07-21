@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>POS Osteria Vera</title>
+    <!-- Collega il file CSS separato -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- SCHERMATA DI LOGIN (Email Whitelist) -->
+    <div id="login-screen">
+        <h2 style="font-family: 'Georgia', serif; font-weight: normal;">Osteria Vera</h2>
+        <p style="margin-bottom: 30px; font-size: 14px;">Accesso Riservato allo Staff</p>
+        
+        <input type="email" id="email-input" placeholder="Inserisci la tua email..." autocomplete="email">
+        <button class="action-btn" onclick="tentaLogin()">AVANTI</button>
+        
+        <div id="login-error" class="error-msg">Accesso negato. Email non autorizzata.</div>
+    </div>
+
+    <!-- NUOVA SCHERMATA OTP -->
+    <div id="otp-screen" style="display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: var(--blu-elegante); color: var(--panna); padding: 20px; text-align: center;">
+        <h2 style="font-family: 'Georgia', serif; font-weight: normal;">Verifica Sicurezza</h2>
+        <p style="margin-bottom: 30px; font-size: 14px; line-height: 1.5;">
+            Abbiamo inviato un codice a 6 cifre all'amministrazione.<br>Chiedi il codice per sbloccare la cassa.
+        </p>
+        
+        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" id="otp-input" placeholder="- - - - - -" style="width: 80%; max-width: 300px; padding: 15px; border: none; border-radius: 4px; font-size: 24px; margin-bottom: 20px; text-align: center; letter-spacing: 5px;">
+        <button class="action-btn" onclick="verificaOTP()">SBLOCCA</button>
+        
+        <div id="otp-error" class="error-msg" style="color: #ff6b6b; margin-top: 20px; font-size: 14px; font-weight: bold; display: none;">Codice errato. Riprova.</div>
+        <button onclick="tornaAlLogin()" style="background: transparent; border: none; color: var(--panna); text-decoration: underline; margin-top: 30px; cursor: pointer;">Annulla</button>
+    </div>
+    <!-- L'APP PER LE COMANDE (Inizialmente Nascosta) -->
+    <div id="app-screen">
+        <header>
+            <div class="user-info">
+                👤 <span id="logged-user">Utente</span>
+            </div>
+            
+            <!-- NUOVO: Selezione Sala -->
+            <select id="sala-select" style="font-size: 14px; padding: 5px; background: var(--panna); color: var(--blu-elegante); border-radius: 4px; font-weight: bold; margin-right: 5px;">
+                <option value="0" disabled selected>SALA</option>
+                <option value="Panca">Sala Panca</option>
+                <option value="Quadri">Sala Quadri</option>
+                <option value="Forno">Sala Forno</option>
+            </select>
+
+            <!-- AGGIORNATO: 10 Tavoli -->
+            <select id="table-select" style="font-size: 14px; padding: 5px; background: var(--panna); color: var(--blu-elegante); border-radius: 4px; font-weight: bold;">
+                <option value="0" disabled selected>TAVOLO</option>
+                <option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="4">4</option>
+                <option value="5">5</option><option value="6">6</option>
+                <option value="7">7</option><option value="8">8</option>
+                <option value="9">9</option><option value="10">10</option>
+            </select>
+            
+            <button class="logout-btn" onclick="logout()">ESCI</button>
+        </header>
+
+        <div class="main-content">
+            <!-- Categorie Laterali -->
+            <div class="categories" id="cat-container">
+                <!-- Generato dal JS -->
+            </div>
+            <!-- Piatti centrali -->
+            <div class="items-grid" id="items-container">
+                <!-- Generato dal JS -->
+            </div>
+        </div>
+
+        <!-- Barra in basso fissa per il carrello -->
+        <div class="cart-bar">
+            <div class="cart-summary" onclick="apriCarrello()">
+                🛒 <span id="cart-count">0</span> Pz. <br> 
+                <small style="color:gray; font-weight:normal;">Vedi Comanda</small>
+            </div>
+            <button class="send-btn" onclick="inviaOrdine()">INVIA IN CUCINA</button>
+        </div>
+    </div>
+
+    <!-- Modale Comanda Aperta -->
+    <div id="cart-modal" class="modal-overlay">
+        <div class="cart-content">
+            <div class="cart-header">
+                <h2>Riepilogo Ordine</h2>
+                <button class="close-btn" onclick="chiudiCarrello()">✖</button>
+            </div>
+            <div class="cart-list" id="cart-list">
+                <!-- Generato dal JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Collega il file JavaScript separato alla fine del body -->
+    <!-- INIZIO COLLEGAMENTO FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+        // Abbiamo aggiunto getDocs, query, where, updateDoc e doc
+        import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+    apiKey: "AIzaSyAXpWgQHgx3hgj7AhEPbJd9OhRJ8L606cU",
+    authDomain: "comande-osteria-vera.firebaseapp.com",
+    projectId: "comande-osteria-vera",
+    storageBucket: "comande-osteria-vera.firebasestorage.app",
+    messagingSenderId: "128040702699",
+    appId: "1:128040702699:web:acad39f79c34257b16a4ae"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Creiamo il ponte con tutte le nuove funzioni
+        window.dbOsteria = db;
+        window.collezione = collection;
+        window.aggiungiDocumento = addDoc;
+        window.ottieniDocumenti = getDocs;
+        window.query = query;
+        window.where = where;
+        window.aggiornaDocumento = updateDoc;
+        window.riferimentoDocumento = doc;
+    </script>
+    
+    <!-- IL TUO FILE SCRIPT -->
+    <script src="script.js"></script>
+    <!-- Carica la libreria EmailJS -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+<script type="text/javascript">
+    // Inizializza con la tua PUBLIC KEY (Dashboard EmailJS -> Account -> General -> "Public Key")
+    (function(){
+        const CHIAVE_PUBBLICA_EMAILJS = "INSERISCI_QUI_LA_TUA_PUBLIC_KEY"; // <-- sostituisci con la chiave reale
+
+        if (CHIAVE_PUBBLICA_EMAILJS === "INSERISCI_QUI_LA_TUA_PUBLIC_KEY") {
+            console.warn("⚠️ EmailJS non configurato: manca la Public Key reale in index.html. Finché resta questo segnaposto, l'invio del codice OTP via email fallirà sempre (l'app mostrerà comunque il codice di emergenza nell'alert).");
+        }
+
+        emailjs.init(CHIAVE_PUBBLICA_EMAILJS);
+    })();
+</script>
+</body>
+</html>
