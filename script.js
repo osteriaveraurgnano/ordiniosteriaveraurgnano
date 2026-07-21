@@ -282,12 +282,11 @@ function caricaCategoria(nomeCategoria) {
         itemsContainer.appendChild(itemRow);
     });
 }
-
 function aggiungiAlCarrello(piatto, elementoHtml) {
     // 1. Calcoliamo la capacità massima di aperitivi attuale
     let capienzaMassima = 0;
     
-    // Contiamo le bevande nel carrello con le rispettive regole
+    // Contiamo le bevande già presenti nel carrello
     carrello.forEach(p => {
         if (menuOsteria['Drink'].includes(p) || 
             menuOsteria['ViniCalice'].includes(p) || 
@@ -300,15 +299,32 @@ function aggiungiAlCarrello(piatto, elementoHtml) {
         }
     });
 
-    // 2. Controllo specifico se stiamo aggiungendo un aperitivo
+    // 2. Controllo stringente per la Formula Aperitivo
     if (piatto === "Formula Aperitivo") {
-        let conteggioAperitivi = carrello.filter(p => p === "Formula Aperitivo").length;
+        let conteggioAperitiviPresenti = carrello.filter(p => p === "Formula Aperitivo").length;
 
-        if (conteggioAperitivi >= capienzaMassima) {
+        if (conteggioAperitiviPresenti >= capienzaMassima) {
             alert("⚠️ Capacità raggiunta: aggiungi una bottiglia o un altro drink per altre formule aperitivo!");
-            return; // Blocca l'aggiunta
+            return; // Blocca l'aggiunta se non c'è capienza
         }
     }
+
+    // 3. Se il controllo passa, procedi con l'aggiunta
+    carrello.push(piatto);
+    aggiornaUI();
+    
+    // Feedback visivo
+    if (elementoHtml) { // Controlliamo che l'elemento esista
+        let coloreOriginale = elementoHtml.style.backgroundColor;
+        let testoOriginale = elementoHtml.style.color;
+        elementoHtml.style.backgroundColor = "var(--success)";
+        elementoHtml.style.color = "white";
+        setTimeout(() => { 
+            elementoHtml.style.backgroundColor = coloreOriginale; 
+            elementoHtml.style.color = testoOriginale; 
+        }, 150);
+    }
+}
 
     // 3. Procedi con l'aggiunta normale
     carrello.push(piatto);
