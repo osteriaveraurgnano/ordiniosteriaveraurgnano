@@ -285,16 +285,18 @@ function aggiungiAlCarrello(piatto, elementoHtml) {
     // 1. Calcoliamo la capacità massima di aperitivi attuale
     let capienzaMassima = 0;
     
-    // Contiamo le bevande già presenti nel carrello
+    // Contiamo le bevande nel carrello (ESCLUDENDO la Formula Aperitivo)
     carrello.forEach(p => {
-        if (menuOsteria['Drink'].includes(p) || 
-            menuOsteria['ViniCalice'].includes(p) || 
-            menuOsteria['BirreSpina'].includes(p) || 
-            menuOsteria['BirreBottiglia'].includes(p)) {
-            capienzaMassima += 1; // 1 drink = 1 aperitivo
-        } 
-        else if (menuOsteria['ViniBottiglia'].includes(p)) {
-            capienzaMassima += 6; // 1 bottiglia = 6 aperitivi
+        if (p !== "Formula Aperitivo") { // <-- IL TRUCCO È QUI!
+            if (menuOsteria['Drink'].includes(p) || 
+                menuOsteria['ViniCalice'].includes(p) || 
+                menuOsteria['BirreSpina'].includes(p) || 
+                menuOsteria['BirreBottiglia'].includes(p)) {
+                capienzaMassima += 1; // 1 drink = 1 aperitivo
+            } 
+            else if (menuOsteria['ViniBottiglia'].includes(p)) {
+                capienzaMassima += 6; // 1 bottiglia = 6 aperitivi
+            }
         }
     });
 
@@ -307,6 +309,23 @@ function aggiungiAlCarrello(piatto, elementoHtml) {
             return; // Blocca l'aggiunta se non c'è capienza
         }
     }
+
+    // 3. Se il controllo passa, procedi con l'aggiunta
+    carrello.push(piatto);
+    aggiornaUI();
+    
+    // Feedback visivo
+    if (elementoHtml) { // Controlliamo che l'elemento esista
+        let coloreOriginale = elementoHtml.style.backgroundColor;
+        let testoOriginale = elementoHtml.style.color;
+        elementoHtml.style.backgroundColor = "var(--success)";
+        elementoHtml.style.color = "white";
+        setTimeout(() => { 
+            elementoHtml.style.backgroundColor = coloreOriginale; 
+            elementoHtml.style.color = testoOriginale; 
+        }, 150);
+    }
+}
 
     // 3. Se il controllo passa, procedi con l'aggiunta
     carrello.push(piatto);
