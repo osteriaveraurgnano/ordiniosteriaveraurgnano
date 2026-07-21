@@ -1,7 +1,6 @@
 // ==========================================
 // 1. SISTEMA DI SICUREZZA (WHITELIST + OTP)
 // ==========================================
-
 const emailAutorizzate = [
    "matteopalmie06@gmail.com",
     "moni.palmi22@gmail.com"
@@ -9,10 +8,6 @@ const emailAutorizzate = [
 
 let otpAttuale = ""; // Variabile per salvare il codice generato
 let utenteInAttesa = ""; // Salva chi sta cercando di entrare
-
-// Aggiungi questo script nel <head> del tuo index.html: 
-// <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-// Poi inizializza EmailJS all'avvio: (emailjs.init("LA_TUA_PUBLIC_KEY");)
 
 async function tentaLogin() {
     const inputEmail = document.getElementById('email-input').value.toLowerCase().trim();
@@ -45,6 +40,7 @@ async function tentaLogin() {
         errorMsg.style.display = "block";
     }
 }
+
 function verificaOTP() {
     const inputOtp = document.getElementById('otp-input').value.trim();
     const errorOtp = document.getElementById('otp-error');
@@ -72,7 +68,7 @@ function tornaAlLogin() {
 }
 
 function logout() {
-   localStorage.removeItem("dispositivoAutorizzato");
+    localStorage.removeItem("dispositivoAutorizzato");
     document.getElementById('email-input').value = "";
     document.getElementById('table-select').value = "0";
     carrello = [];
@@ -81,11 +77,6 @@ function logout() {
     document.getElementById('login-screen').style.display = "flex";
     otpAttuale = "";
 }
-
-// ==========================================
-// 2. DATABASE DEL MENU 
-// ==========================================
-// ... (Tutto il resto del codice JS rimane identico a prima) ...
 
 // ==========================================
 // 2. DATABASE DEL MENU 
@@ -197,6 +188,7 @@ const menuOsteria = {
         "Grappa Monpra"
     ]
 };
+
 // ==========================================
 // 3. LOGICA DI INTERFACCIA E CARRELLO
 // ==========================================
@@ -204,7 +196,7 @@ let carrello = [];
 
 // Inizializza l'interfaccia all'avvio
 window.onload = () => {
-   if (localStorage.getItem("dispositivoAutorizzato") === "si") {
+    if (localStorage.getItem("dispositivoAutorizzato") === "si") {
         document.getElementById('login-screen').style.display = "none";
         document.getElementById('app-screen').style.display = "flex";
     }
@@ -248,7 +240,6 @@ function caricaCategoria(nomeCategoria) {
 
     piattiDaMostrare.forEach(piatto => {
         let itemRow = document.createElement('div');
-        // Aggiungiamo lo stile direttamente qui per essere sicuri
         itemRow.style.display = "flex";
         itemRow.style.justifyContent = "space-between";
         itemRow.style.alignItems = "center";
@@ -289,6 +280,7 @@ function caricaCategoria(nomeCategoria) {
         itemsContainer.appendChild(itemRow);
     });
 }
+
 function aggiungiAlCarrello(piatto, elementoHtml) {
     // 1. Calcoliamo la capacità massima di aperitivi attuale
     let capienzaMassima = 0;
@@ -333,21 +325,6 @@ function aggiungiAlCarrello(piatto, elementoHtml) {
     }
 }
 
-    // 3. Procedi con l'aggiunta normale
-    carrello.push(piatto);
-    aggiornaUI();
-    
-    // Feedback visivo
-    let coloreOriginale = elementoHtml.style.backgroundColor;
-    let testoOriginale = elementoHtml.style.color;
-    elementoHtml.style.backgroundColor = "var(--success)";
-    elementoHtml.style.color = "white";
-    setTimeout(() => { 
-        elementoHtml.style.backgroundColor = coloreOriginale; 
-        elementoHtml.style.color = testoOriginale; 
-    }, 150);
-}
-
 function aggiornaUI() {
     document.getElementById('cart-count').innerText = carrello.length;
     const cartList = document.getElementById('cart-list');
@@ -368,6 +345,7 @@ function aggiornaUI() {
 
 function apriCarrello() { document.getElementById('cart-modal').style.display = "flex"; }
 function chiudiCarrello() { document.getElementById('cart-modal').style.display = "none"; }
+
 async function inviaOrdine() {
     let sala = document.getElementById('sala-select').value;
     let tavolo = document.getElementById('table-select').value;
