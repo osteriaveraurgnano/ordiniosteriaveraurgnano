@@ -201,7 +201,7 @@ window.onload = () => {
         document.getElementById('app-screen').style.display = "flex";
     }
     generaCategorieLaterali();
-    caricaCategoria('Panuozzi'); // Carica subito i panuozzi di default
+    caricaCategoria('Drink'); // Carica subito i Drink di default
 };
 
 // Funzione 1: Costruisce SOLO i bottoni colorati a sinistra
