@@ -94,26 +94,23 @@
         </div>
     </div>
 
-    <!-- Collega il file JavaScript separato alla fine del body -->
-    <!-- INIZIO COLLEGAMENTO FIREBASE -->
+<!-- 1. INIZIO COLLEGAMENTO FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-        // Abbiamo aggiunto getDocs, query, where, updateDoc e doc
         import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
         const firebaseConfig = {
-    apiKey: "AIzaSyAXpWgQHgx3hgj7AhEPbJd9OhRJ8L606cU",
-    authDomain: "comande-osteria-vera.firebaseapp.com",
-    projectId: "comande-osteria-vera",
-    storageBucket: "comande-osteria-vera.firebasestorage.app",
-    messagingSenderId: "128040702699",
-    appId: "1:128040702699:web:acad39f79c34257b16a4ae"
-};
+            apiKey: "AIzaSyAXpWgQHgx3hgj7AhEPbJd9OhRJ8L606cU",
+            authDomain: "comande-osteria-vera.firebaseapp.com",
+            projectId: "comande-osteria-vera",
+            storageBucket: "comande-osteria-vera.firebasestorage.app",
+            messagingSenderId: "128040702699",
+            appId: "1:128040702699:web:acad39f79c34257b16a4ae"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Creiamo il ponte con tutte le nuove funzioni
         window.dbOsteria = db;
         window.collezione = collection;
         window.aggiungiDocumento = addDoc;
@@ -124,10 +121,18 @@
         window.riferimentoDocumento = doc;
     </script>
     
-    <!-- IL TUO FILE SCRIPT -->
+    <!-- 2. CARICA EMAILJS PRIMA DEL TUO SCRIPT -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            emailjs.init("j2PvugDyfmYdls9M7"); 
+        })();
+    </script>
+
+    <!-- 3. IL TUO SCRIPT VA ALLA FINE DI TUTTO -->
     <script src="script.js"></script>
-    <!-- Carica la libreria EmailJS -->
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</body>
+</html>
 
 <script type="text/javascript">
     // Inizializza con la tua PUBLIC KEY (Dashboard EmailJS -> Account -> General -> "Public Key")
