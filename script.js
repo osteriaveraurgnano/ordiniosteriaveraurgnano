@@ -317,6 +317,7 @@ function aggiornaUI() {
     const cartList = document.getElementById('cart-list');
     cartList.innerHTML = "";
     
+    // Contiamo le occorrenze di ogni piatto
     let conteggi = {};
     carrello.forEach(piatto => {
         conteggi[piatto] = (conteggi[piatto] || 0) + 1;
@@ -325,10 +326,31 @@ function aggiornaUI() {
     Object.keys(conteggi).forEach(piatto => {
         let div = document.createElement('div');
         div.className = 'cart-item';
-        div.innerHTML = `<span><b style="color:var(--blu-elegante);">${conteggi[piatto]}x</b> ${piatto}</span>`;
+        // Aggiungiamo i bottoni + e -
+        div.innerHTML = `
+            <span><b>${conteggi[piatto]}x</b> ${piatto}</span>
+            <div>
+                <button onclick="cambiaQuantita('${piatto}', -1)" style="padding:5px 10px; margin-right:5px;">-</button>
+                <button onclick="cambiaQuantita('${piatto}', 1)" style="padding:5px 10px;">+</button>
+            </div>
+        `;
         cartList.appendChild(div);
     });
 }
+function cambiaQuantita(piatto, delta) {
+    if (delta === 1) {
+        // Aggiunge un elemento
+        carrello.push(piatto);
+    } else if (delta === -1) {
+        // Trova l'indice del primo elemento che corrisponde al piatto e lo rimuove
+        const index = carrello.indexOf(piatto);
+        if (index > -1) {
+            carrello.splice(index, 1);
+        }
+    }
+    aggiornaUI(); // Ridisegna l'interfaccia dopo la modifica
+}
+
 
 function apriCarrello() { document.getElementById('cart-modal').style.display = "flex"; }
 function chiudiCarrello() { document.getElementById('cart-modal').style.display = "none"; }
