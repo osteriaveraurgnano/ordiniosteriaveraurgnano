@@ -229,24 +229,68 @@
 
         window.segnaFattoBar = async function(id) { await updateDoc(doc(db, "comande", id), { da_fare_bar: {} }); }
         window.segnaPagato = async function(id) { await updateDoc(doc(db, "comande", id), { pagato: true }); }
-
         window.modificaOrdine = async function(idOrdine, nomePiatto, delta) {
             const ordine = datiComande.find(o => o.id === idOrdine);
             if (!ordine) return;
 
-            let piattiAggiornati = { ...ordine.piatti };
-            let nuovaQuantita = (piattiAggiornati[nomePiatto] || 0) + delta;
+            // 1. Definiamo quali piatti vanno in Cucina e quali ai Dolci
+            const piattiCucina = [
+                "Antipasto della casa", "Provola in Purgatorio", "Tagliere di Formaggi", "Tagliere di Salumi", "Frittelle", "Patatine Fritte", // Antipasti
+                "Vico", "Arola", "Fornacelle", "Moiano", "Montechiaro", "Seiano", "Ticciano", "Massaquano", // Panuozzi
+                "Gnocchi alla Sorrentina", "fusilli alla Genovese", "Trofie tricolore", "Polpette al Sugo", "Parmigiana di Melanzane", "Caprese" // Cucina
+            ];
+            const piattiDolci = ["Pastiera", "Cremoso alla nocciola", "sorbetto al limone"];
 
-            if (nuovaQuantita <= 0) {
-                delete piattiAggiornati[nomePiatto];
+            let vaInCucina = false;
+            let vaAlBar = false;
+
+            // Logica di smistamento (uguale al cameriere)
+            if (nomePiatto === "Formula Aperitivo") {
+                vaInCucina = true;
+            } else if (piattiDolci.includes(nomePiatto)) {
+                vaInCucina = true;
+                vaAlBar = true;
+            } else if (piattiCucina.includes(nomePiatto)) {
+                vaInCucina = true;
             } else {
-                piattiAggiornati[nomePiatto] = nuovaQuantita;
+                vaAlBar = true; // Tutto il resto va al bar
             }
 
+            // 2. Prepariamo gli oggetti da aggiornare
+            let piattiAggiornati = { ...ordine.piatti };
+            let cucinaAggiornata = { ...(ordine.da_fare_cucina || {}) };
+            let barAggiornato = { ...(ordine.da_fare_bar || {}) };
+
+            // A. Aggiorniamo il totale dello scontrino (Cassa)
+            let nuovaQuantitaTotale = (piattiAggiornati[nomePiatto] || 0) + delta;
+            if (nuovaQuantitaTotale <= 0) {
+                delete piattiAggiornati[nomePiatto];
+            } else {
+                piattiAggiornati[nomePiatto] = nuovaQuantitaTotale;
+            }
+
+            // B. Aggiorniamo la coda della CUCINA
+            if (vaInCucina) {
+                let qCucina = (cucinaAggiornata[nomePiatto] || 0) + delta;
+                if (qCucina <= 0) delete cucinaAggiornata[nomePiatto]; // Se va a 0 o meno, sparisce dal monitor
+                else cucinaAggiornata[nomePiatto] = qCucina;
+            }
+
+            // C. Aggiorniamo la coda del BAR
+            if (vaAlBar) {
+                let qBar = (barAggiornato[nomePiatto] || 0) + delta;
+                if (qBar <= 0) delete barAggiornato[nomePiatto]; // Se va a 0 o meno, sparisce dal monitor
+                else barAggiornato[nomePiatto] = qBar;
+            }
+
+            // 3. Salviamo tutto su Firebase in un colpo solo
             await updateDoc(doc(db, "comande", idOrdine), {
-                piatti: piattiAggiornati
+                piatti: piattiAggiornati,
+                da_fare_cucina: cucinaAggiornata,
+                da_fare_bar: barAggiornato
             });
         };
+
 
         window.cambiaVista = function(nuovaVista) {
             window.vistaAttuale = nuovaVista;
