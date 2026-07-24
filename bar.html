@@ -229,7 +229,25 @@ function verificaOTP() {
 
         window.segnaFattoBar = async function(id) { await updateDoc(doc(db, "comande", id), { da_fare_bar: {} }); }
         window.segnaPagato = async function(id) { await updateDoc(doc(db, "comande", id), { pagato: true }); }
+// Aggiungi questo dentro <script type="module">
+window.modificaOrdine = async function(idOrdine, nomePiatto, delta) {
+    const ordine = datiComande.find(o => o.id === idOrdine);
+    if (!ordine) return;
 
+    let piattiAggiornati = { ...ordine.piatti };
+    let nuovaQuantita = (piattiAggiornati[nomePiatto] || 0) + delta;
+
+    if (nuovaQuantita <= 0) {
+        delete piattiAggiornati[nomePiatto];
+    } else {
+        piattiAggiornati[nomePiatto] = nuovaQuantita;
+    }
+
+    await updateDoc(doc(db, "comande", idOrdine), {
+        piatti: piattiAggiornati
+    });
+};
+e
         window.cambiaVista = function(nuovaVista) {
             window.vistaAttuale = nuovaVista;
             
@@ -281,17 +299,24 @@ function verificaOTP() {
                     tastoHtml = `<button class="btn-azione" style="background: #5bc0de;" onclick="segnaFattoBar('${ordine.id}')">FATTO</button>`;
                 } 
                 else {
-                    for (let [piatto, quantita] of Object.entries(ordine.piatti)) {
-                        let prezzoUnitario = window.listinoPrezzi[piatto] || 0; 
-                        let costoRiga = prezzoUnitario * quantita;
-                        totaleScontrino += costoRiga;
-                        
-                        piattiHtml += `
-                            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #ccc; margin-bottom: 5px;">
-                                <span><b>${quantita}x</b> ${piatto}</span>
-                                <span>${costoRiga.toFixed(2)} €</span>
-                            </div>`;
-                    }
+                    // Cerca questo ciclo all'interno della funzione 'disegnaSchermo' nel blocco 'else'
+for (let [piatto, quantita] of Object.entries(ordine.piatti)) {
+    let prezzoUnitario = window.listinoPrezzi[piatto] || 0; 
+    let costoRiga = prezzoUnitario * quantita;
+    totaleScontrino += costoRiga;
+    
+    // AGGIORNA QUESTA PARTE DEL CODICE:
+    piattiHtml += `
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; margin-bottom: 5px;">
+            <span><b>${quantita}x</b> ${piatto}</span>
+            <div>
+                <button onclick="modificaOrdine('${ordine.id}', '${piatto}', -1)" style="padding:2px 8px; margin-right:5px; cursor:pointer;">-</button>
+                <button onclick="modificaOrdine('${ordine.id}', '${piatto}', 1)" style="padding:2px 8px; cursor:pointer;">+</button>
+            </div>
+            <span>${costoRiga.toFixed(2)} €</span>
+        </div>`;
+}
+
                     daMostrare = true;
                     
                     tastoHtml = `
